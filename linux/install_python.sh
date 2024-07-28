@@ -16,7 +16,7 @@ PYTHON_VERSION=3.12.4  &&  MD5SUM_CHECK=d68f25193eec491eb54bc2ea664a05bd
 function check_for_root {
     if [ "$(whoami)" != "root" ]; then
         echo "please run this script as root or via sudo!"
-        exit 1
+        return 1
     fi
 }
 
@@ -34,7 +34,7 @@ function install_dependencies {
         :  # do nothing
     else
         echo "dependencies could not be installed completely"
-        exit 1
+        return 1
     fi
 }
 
@@ -50,7 +50,7 @@ function get_source_code {
     else
         echo "md5sum: ${MD5SUM_REAL}"
         echo "invalid md5sum! -- aborting installation"
-        exit 1
+        return 1
     fi
     tar -xf ${FILE_NAME} && rm ${FILE_NAME}
 }
@@ -60,14 +60,14 @@ function build_python {
     echo "#  3. build and install python from source                                     #"
     echo "################################################################################"
     DIR_NAME="Python-${PYTHON_VERSION}"
-    pushd ${DIR_NAME} || exit
+    pushd ${DIR_NAME} || return 1
     echo "#####  3.1 configure build options  ############################################"
-    ./configure --enable-optimizations --with-lto || exit
+    ./configure --enable-optimizations --with-lto || return 1
     echo "#####  3.2 build the binary  ###################################################"
-    make || exit
+    make || return 1
     echo "#####  3.3 install on the system  ##############################################"
-    make altinstall || exit
-    popd || exit
+    make altinstall || return 1
+    popd || return 1
     rm -r ${DIR_NAME}
 }
 
@@ -85,12 +85,12 @@ function make_default {
 }
 
 function main {
-    check_for_root || exit 1
-    install_dependencies || exit 2
-    get_source_code || exit 3
-    build_python || exit 4
+    check_for_root || return 1
+    install_dependencies || return 2
+    get_source_code || return 3
+    build_python || return 4
     # uncomment, if you want the new version to become the default:
-    # make_default || exit 5
+    # make_default || exreturnit 5
 }
 
 time main
